@@ -4,10 +4,6 @@ console.log('apiUrl', apiUrl);
 
 //curl -X POST -H "Content-Type: application/json" -d '{"user_query":"why?"}' http://sh03-13n01:8000/query/
 
-var sendData = {
-  "query": "How do I use flask on sherlock",
-}
-
 const sendMessage = async (message) => {
   addMessage(message, "end");
   addThinking();
@@ -34,19 +30,24 @@ const sendMessage = async (message) => {
     chatEasy(resData.answer, resData.cluster);
   } catch (error) {
     console.error('Some Error Occured:', error);
+    var errorMessage = "Something has gone wrong, please try again.";
+    console.error('errorMessage:', errorMessage);
+    chatEasy(errorMessage, '');
   }
 }
 
 const chatEasy = async (message, cluster) => {
   console.log("chatEasy ", message);
-  //const htmlText = md.render(message)
-  addMessage(message, "start", cluster);
+  const mdMessage = marked.parse(message);
+  console.log('mdMessage', mdMessage);
+  addMessage(mdMessage, "start", cluster);
 }
 const addMessage = (msg, direction, cluster) => {
+  removeThinking();
   const messageHolder = document.getElementById("messageHolder");
   const message = document.createElement("div");
-  const colour = direction !== "start" ? "bg-fog-light" : "shadow";
-  const colorClass = colour;
+  const color = direction !== "start" ? "bg-fog-light" : "shadow";
+  const colorClass = color;
   const clusterClass = cluster;
   var clusterString = "";
   if (cluster) {
@@ -63,18 +64,25 @@ const addMessage = (msg, direction, cluster) => {
     `
   messageHolder.appendChild(message);
 }
+
 const addThinking = () => {
-      console.log('adding thinking');
-var message = document.createElement("div");
-  const messageText = '<div class="fa-3x thinking flex flex-col flex-start"><i class="fa-solid fa-cog fa-spin"></i> SPIN!</div>'
+  console.log('adding thinking');
+  var message = document.createElement("div");
+  message.id = 'thinking';
+  const messageText = '<div class="loader"></div>'
   const messageHolder = document.getElementById("messageHolder");
   message.innerHTML = messageText;
-
-  //onst message = messageHolder.createElement("div");
-
-messageHolder.appendChild(message);
-
+  messageHolder.appendChild(message);
 }
+
+const removeThinking = () => {
+  console.log('removing thinking');
+  const thinking = document.getElementById("thinking");
+  if (thinking) {
+    thinking.remove();
+  }
+}
+
 const messageInput = document.getElementById("chat");
 const sendBtn = document.getElementById("btn");
 
