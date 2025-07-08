@@ -1,1 +1,3 @@
-To run: python3 app.py
+To run: 
+pip install flask flask_cors
+python3 app.py
