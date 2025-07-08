@@ -51,7 +51,7 @@ const addMessage = (msg, direction, cluster) => {
   const clusterClass = cluster;
   var clusterString = "";
   if (cluster) {
-    clusterString = `<div class=" ${clusterClass}"> ${cluster}</div>`
+    clusterString = `<div class="cluster-label ${clusterClass}"> ${cluster}</div>`
   }
   const flexClass = "items-" + direction;
   console.log('colorClass', colorClass);
