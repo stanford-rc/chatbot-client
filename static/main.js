@@ -5,7 +5,7 @@ console.log('apiUrl', apiUrl);
 //curl -X POST -H "Content-Type: application/json" -d '{"user_query":"why?"}' http://sh03-13n01:8000/query/
 
 var currentCluster = "";
-
+var existing = [];
 const sendMessage = async (message) => {
   addMessage(message, "end");
   addThinking();
@@ -36,7 +36,7 @@ const sendMessage = async (message) => {
     console.error('Some Error Occured:', error);
     var errorMessage = "Something has gone wrong, please try again.";
     console.error('errorMessage:', errorMessage);
-    convertMarkdown(errorMessage, '');
+    convertMarkdown(errorMessage, currentCluster);
   }
 }
 
@@ -70,7 +70,21 @@ const addMessage = (msg, direction, cluster) => {
      </div>         
     `
   messageHolder.appendChild(message);
+  scrollDown();
+
 }
+
+const scrollDown = function(){
+  const messageHolder = document.getElementById("messageHolder");
+           messageHolder.scrollIntoView({
+                block: 'end',
+                behavior: 'smooth',
+                inline: 'nearest'
+            });
+             console.log('scrolling message');
+            document.getElementById("chat").focus();
+}
+
 
 const addThinking = () => {
   console.log('adding thinking');
@@ -78,8 +92,15 @@ const addThinking = () => {
   message.id = 'thinking';
   const messageText = '<div class="loader"></div>'
   const messageHolder = document.getElementById("messageHolder");
-  message.innerHTML = messageText;
+    message.innerHTML = `
+<div class="flex  items-start gap-25 m-12">
+     <img class="w-40 h-40 rounded-full" src="/static/images/ada.png" alt="Ada">
+     <div class="bg-gray-100 text-neutral-800 rounded-tl-none flex-col flex max-w-60 min-w-90 p-12 border-gray-200 rounded-xl dark:bg-gray-700">${messageText}
+     </div>         
+    </div>    
+    `
   messageHolder.appendChild(message);
+  scrollDown();
 }
 
 const removeThinking = () => {
@@ -88,6 +109,7 @@ const removeThinking = () => {
   if (thinking) {
     thinking.remove();
   }
+    scrollDown();
 }
 
 const messageInput = document.getElementById("chat");
