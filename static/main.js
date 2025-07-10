@@ -4,11 +4,14 @@ console.log('apiUrl', apiUrl);
 
 //curl -X POST -H "Content-Type: application/json" -d '{"user_query":"why?"}' http://sh03-13n01:8000/query/
 
+var currentCluster = "";
+var existing = [];
 const sendMessage = async (message) => {
   addMessage(message, "end");
   addThinking();
   let sendData = {
-    "query": message
+    "query": message,
+    "cluster": currentCluster
   }
   try {
     const response = await fetch(apiUrl, {
@@ -27,17 +30,18 @@ const sendMessage = async (message) => {
     const resData = await response.json();
     console.log('resData:', resData);
     console.log('resData.answer:', resData.answer);
-    chatEasy(resData.answer, resData.cluster);
+    convertMarkdown(resData.answer, resData.cluster);
+    currentCluster = resData.cluster;
   } catch (error) {
     console.error('Some Error Occured:', error);
     var errorMessage = "Something has gone wrong, please try again.";
     console.error('errorMessage:', errorMessage);
-    chatEasy(errorMessage, '');
+    convertMarkdown(errorMessage, currentCluster);
   }
 }
 
-const chatEasy = async (message, cluster) => {
-  console.log("chatEasy ", message);
+const convertMarkdown = async (message, cluster) => {
+  console.log("convertMarkdown ", message);
   const mdMessage = marked.parse(message);
   console.log('mdMessage', mdMessage);
   addMessage(mdMessage, "start", cluster);
@@ -46,8 +50,12 @@ const addMessage = (msg, direction, cluster) => {
   removeThinking();
   const messageHolder = document.getElementById("messageHolder");
   const message = document.createElement("div");
-  const color = direction !== "start" ? "bg-fog-light" : "shadow";
-  const colorClass = color;
+  const bgColorClass = direction !== "start" ? "bg-digital-red" : "bg-gray-100";
+  const pfp = '<img class="w-40 h-40 rounded-full" src="/static/images/ada.png" alt="Ada" />'
+  const icon = direction !== "start" ? "" : pfp;
+  const colClass = direction !== "start" ? "flex-col" : "";
+  const cornerClass = direction !== "start" ? "" : "rounded-tl-none";
+  const colorClass = direction !== "start" ? "text-white" : "text-neutral-800";
   const clusterClass = cluster;
   var clusterString = "";
   if (cluster) {
@@ -56,14 +64,27 @@ const addMessage = (msg, direction, cluster) => {
   const flexClass = "items-" + direction;
   console.log('colorClass', colorClass);
   message.innerHTML = `
-     <div class="flex flex-col ${flexClass}">
-            <div class="${colorClass} px-8 py-4 rounded-md text-default w-fit 
-            max-w-4xl mb-12">${msg}</div>
-            ${clusterString}
-           </div>           
+     <div class="flex ${colClass} ${flexClass} gap-25 m-12">
+     ${icon}
+     <div class="${bgColorClass} ${colorClass} ${cornerClass} flex-col flex max-w-60 leading-1.5 p-12 border-gray-200  rounded-xl dark:bg-gray-700">${msg}
+     </div>         
     `
   messageHolder.appendChild(message);
+  scrollDown();
+
 }
+
+const scrollDown = function(){
+  const messageHolder = document.getElementById("messageHolder");
+           messageHolder.scrollIntoView({
+                block: 'end',
+                behavior: 'smooth',
+                inline: 'nearest'
+            });
+             console.log('scrolling message');
+            document.getElementById("chat").focus();
+}
+
 
 const addThinking = () => {
   console.log('adding thinking');
@@ -71,8 +92,15 @@ const addThinking = () => {
   message.id = 'thinking';
   const messageText = '<div class="loader"></div>'
   const messageHolder = document.getElementById("messageHolder");
-  message.innerHTML = messageText;
+    message.innerHTML = `
+<div class="flex  items-start gap-25 m-12">
+     <img class="w-40 h-40 rounded-full" src="/static/images/ada.png" alt="Ada">
+     <div class="bg-gray-100 text-neutral-800 rounded-tl-none flex-col flex max-w-60 min-w-90 p-12 border-gray-200 rounded-xl dark:bg-gray-700">${messageText}
+     </div>         
+    </div>    
+    `
   messageHolder.appendChild(message);
+  scrollDown();
 }
 
 const removeThinking = () => {
@@ -81,6 +109,7 @@ const removeThinking = () => {
   if (thinking) {
     thinking.remove();
   }
+    scrollDown();
 }
 
 const messageInput = document.getElementById("chat");
@@ -102,3 +131,6 @@ sendBtn.addEventListener("click", function() {
   sendMessage(message);
   messageInput.value = "";
 });
+
+const helloMessage = "Hi! I'm Ada. I can help you learn how to use Stanford's HPC resources."
+addMessage(helloMessage, "start");
